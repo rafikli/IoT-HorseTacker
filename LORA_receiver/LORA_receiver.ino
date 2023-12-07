@@ -227,26 +227,24 @@ void setup() {
   Serial.println("LoRa Initializing OK!");
 }
 // String receivedData = "SEN:1024";
-String receivedData;
-
 void loop() {
   now = time(nullptr);
   if (!client.connected())
   {
-    checkWiFiThenMQTT();
-    //checkWiFiThenMQTTNonBlocking();
+    //checkWiFiThenMQTT();
+    checkWiFiThenMQTTNonBlocking();
   }
   else
   {
-    client.loop();
-    receivedData = receivePacket();
+    String receivedData = receivePacket();
+    if (receivedData.length() > 0) {
+      Serial.println("Sending MQTT");
+      parseSendPacket(receivedData);
+    }
     if (millis() - lastMillis > 1000)
     {
+      client.loop();
       lastMillis = millis();
-      if (receivedData.length() > 0) {
-        Serial.println("Sending MQTT");
-        parseSendPacket(receivedData);
-      }
     }
   }
 }
@@ -256,7 +254,6 @@ const char type_dillation[] = "DILLATION";
 void parseSendPacket(String received) {
   if (received.length() > 0) {
     int colonIndex = received.indexOf(':');
-    
     if (colonIndex != -1) {
       String id = received.substring(0, colonIndex);
       int val = received.substring(colonIndex + 1).toInt();

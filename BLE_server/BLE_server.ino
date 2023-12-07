@@ -11,29 +11,20 @@
 #include <Wire.h>
 
 #define bleServerName "HORSE_ESP32"
-
+// Variables for sensor readings
 float angle;
 int dillation;
 // Timer variables
 unsigned long lastTime = 0;
 unsigned long timerDelay = 30000;
-
 bool deviceConnected = false;
-
-const int ledPin = LED_BUILTIN;  // the number of the LED pin
-unsigned long previousMillis = 0;  // will store last time LED was updated
-const long interval = 1000;  // interval at which to blink (milliseconds)
-int ledState = LOW;  // ledState used to set the LED
-
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 #define SERVICE_UUID "91bad492-b950-4226-aa2b-4ede9fa42f59"
 
-// Angle Characteristic and Descriptor
+// Angle and dillation Characteristic and Descriptor
 BLECharacteristic angleCharacteristics("cba1d466-344c-4be3-ab3f-189f80dd7518", BLECharacteristic::PROPERTY_NOTIFY);
 BLEDescriptor angleDescriptor(BLEUUID((uint16_t)0x2902));
-
-// Dillation Characteristic and Descriptor
 BLECharacteristic dillattionCharacteristics("ca73b3ba-39f6-4ab3-91ae-186dc9577d99", BLECharacteristic::PROPERTY_NOTIFY);
 BLEDescriptor dillationDescriptor(BLEUUID((uint16_t)0x2903));
 
@@ -79,55 +70,32 @@ void setup() {
 void loop() {
   if (deviceConnected) {
     if ((millis() - lastTime) > timerDelay) {
-
-      // Read temperature as Celsius (the default)
+      // Read values from sensors
       angle = readAngle();
-      
-      // Read humidity
       dillation = readDillation();
-      //Notify temperature reading from BME sensor
-
-        static char angleTemp[6];
-        dtostrf(angle, 6, 2, angleTemp);
-        //Set temperature Characteristic value and notify connected client
-        angleCharacteristics.setValue(angleTemp);
-        angleCharacteristics.notify();
-        Serial.print("Angle: ");
-        Serial.print(angle);
-        Serial.print(" º");
-      
-      //Notify humidity reading from BME
+      //Notify readings to connected clients
+      static char angleTemp[6]; 
       static char dillationTemp[6];
+      dtostrf(angle, 6, 2, angleTemp);
       dtostrf(dillation, 6, 2, dillationTemp);
-      //Set humidity Characteristic value and notify connected client
+      angleCharacteristics.setValue(angleTemp);
       dillattionCharacteristics.setValue(dillationTemp);
+      angleCharacteristics.notify();
       dillattionCharacteristics.notify();   
+      // Print values
+      Serial.print("Angle: ");
+      Serial.print(angle);
+      Serial.print(" º");
       Serial.print(" Dillation: ");
       Serial.print(dillation);
-      Serial.println(" %");
-      
       lastTime = millis();
     }
   }
 }
 
 float readAngle(){
-  return random(0,360);
+  return random(0,360); // Repalce with sensor value
 }
 int readDillation(){
-  return random(0,1024);
-}
-
-void blinkOnce() {
-  unsigned long currentMillis = millis();
-  previousMillis = currentMillis;
-  while (currentMillis - previousMillis < interval) {
-    if (ledState == LOW) {
-      ledState = HIGH;
-      digitalWrite(ledPin, ledState);
-    }
-    currentMillis = millis();
-  }
-  ledState = LOW;
-  digitalWrite(ledPin, ledState);
+  return random(0,1024); //Replace with sensor value
 }

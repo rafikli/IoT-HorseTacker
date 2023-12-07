@@ -114,7 +114,7 @@ void setup() {
   Serial.println("LoRa Sender");
   //setup LoRa transceiver module
   LoRa.setPins(ss, rst, dio0);
-  while (!LoRa.begin(866E6)) {
+  while (!LoRa.begin(915E6)) {
     Serial.println(".");
     delay(500);
   }
@@ -159,7 +159,8 @@ void loop() {
       Serial.println(AngleChar);
       sendPacket("ANG:" + String(AngleChar));
       Serial.println(dillationChar);
-      // sendPacket("SEN:" + String(dillationChar));
+      delay(100);
+      sendPacket("SEN:" + String(dillationChar));
     }
   }
 }
